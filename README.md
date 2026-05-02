@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 # 📡 Project PRISM
 
@@ -28,7 +28,7 @@ By deploying a custom Digital Signal Processing (DSP) pipeline and a 135-dimensi
 ### Key Capabilities
 
 | Capability | Detail |
-|---|---|
+|:---|:---|
 | **Zones** | Up to 4 (Empty, Zone A, Zone B, Zone C) |
 | **Accuracy** | 73.3% generalized (4-zone room), 81.4% CV (2-zone corridor) |
 | **Latency** | Real-time (~10ms per inference cycle) |
@@ -41,7 +41,7 @@ By deploying a custom Digital Signal Processing (DSP) pipeline and a 135-dimensi
 ## 📡 Hardware Requirements
 
 | Component | Purpose |
-|---|---|
+|:---|:---|
 | **1× ESP32 NodeMCU** | Flashed with ESP-IDF CSI extraction firmware — operates as a Wi-Fi sniffer |
 | **1× Laptop/PC** | Runs the Python ML backend; connected via Serial USB (`/dev/ttyUSB0`) |
 | **Ambient Wi-Fi** | Any standard 2.4GHz 802.11n router or device within range |
@@ -174,28 +174,15 @@ The raw CSI amplitude from the ESP32 is devastatingly noisy. PRISM applies a thr
 
 ### Stage 1 — Hampel Filter (Outlier Removal)
 
-```
-Problem:  Bluetooth, microwaves, and cosmic rays cause massive random spikes.
-Solution: Rolling median window (size=15). Values exceeding 3σ (via Median
-          Absolute Deviation) are replaced by the local median.
-```
+Bluetooth, microwaves, and other RF sources cause massive random spikes. A rolling median window (size=15) replaces any value exceeding 3σ (via Median Absolute Deviation) with the local median.
 
 ### Stage 2 — Dynamic Background Subtraction
 
-```
-Problem:  Static room geometry (walls, desks) dominates the signal.
-Solution: Trailing 100-packet moving average subtraction zeros out the
-          static environment, isolating only dynamic changes (humans).
-```
+Static room geometry (walls, desks) dominates the raw signal. A trailing 100-packet moving average is subtracted to zero out the static environment, isolating only dynamic (human-induced) changes.
 
 ### Stage 3 — Butterworth Bandpass Filter
 
-```
-Problem:  Low-frequency environmental drift and high-frequency electronic noise.
-Solution: 3rd-order Butterworth bandpass at [0.1 Hz, 3.0 Hz] isolates the
-          Doppler frequencies of human breathing (~0.1–0.5 Hz) and walking
-          (~1.0–3.0 Hz).
-```
+A 3rd-order Butterworth bandpass at **0.1–3.0 Hz** eliminates low-frequency drift and high-frequency electronic noise, isolating the Doppler frequencies of human breathing (~0.1–0.5 Hz) and walking (~1.0–3.0 Hz).
 
 ### Signal Extraction
 
@@ -210,7 +197,7 @@ Solution: 3rd-order Butterworth bandpass at [0.1 Hz, 3.0 Hz] isolates the
 The critical breakthrough was moving from naive per-subcarrier statistics to **domain-aware time-frequency features**. For each 100-packet (1-second) window, we extract:
 
 | Feature Group | Dimensions | Scientific Justification |
-|---|---|---|
+|:---|:---:|:---|
 | **Basic Statistics** | 40 | Variance, std, energy, diff-variance, skewness, kurtosis, IQR, range (5-number summary each) |
 | **Multi-Lag Autocorrelation** | 15 | Lags 1, 5, 10 capture signal persistence — separates erratic noise from rhythmic walking |
 | **Temporal Derivatives** | 10 | 1st and 2nd order temporal diff-variance detects acceleration patterns |
@@ -229,7 +216,7 @@ The critical breakthrough was moving from naive per-subcarrier statistics to **d
 ### Model Evolution
 
 | Version | Script | Model | Features | Classes | Accuracy | Notes |
-|---|---|---|---|---|---|---|
+|:---|:---|:---|:---:|:---:|:---:|:---|
 | v0 | `prism_ai_prev.py` | Random Forest | ~53 (variance only) | 4 | ~65% | Basic per-subcarrier variance |
 | v1 | `prism_ai.py` | SVM-RBF | ~212 (var+std+energy+diff) | 4 | Variable | Leave-One-Chunk-Out CV |
 | v2 | `prism_ai_v2.py` | GradientBoosting | 87 | 3 (corridor) | **81.4%** | Best corridor model |
@@ -255,7 +242,7 @@ The critical breakthrough was moving from naive per-subcarrier statistics to **d
 ### Final Validated Performance (Room Model)
 
 | Metric | Score |
-|---|---|
+|:---|:---:|
 | **Overall Accuracy** | 73.3% |
 | **Empty Detection Recall** | >83% |
 | **Zone B Recall** | >86% |
@@ -405,7 +392,7 @@ Additional captures from diverse environments (STC building, Sparkonics Lab, sta
 ## 🧪 Dependencies
 
 | Package | Version | Purpose |
-|---|---|---|
+|:---|:---|:---|
 | `numpy` | ≥2.4.4 | Matrix operations, ring buffers |
 | `pandas` | ≥3.0.2 | Data loading, rolling window calculations |
 | `scipy` | ≥1.17.1 | Butterworth filter, signal processing |
@@ -431,7 +418,7 @@ Additional captures from diverse environments (STC building, Sparkonics Lab, sta
 ## 📄 Files Reference
 
 | Script | Role | Input | Output |
-|---|---|---|---|
+|:---|:---|:---|:---|
 | `prism.py` | Core DSP library | Raw CSV | Cleaned signal + plots |
 | `prism_debug.py` | ESP32 serial debugger | `/dev/ttyUSB0` | Terminal diagnostics |
 | `prism_ai_room.py` | Room model trainer | `data_room/*.csv` | `prism_model_room.pkl` |
@@ -450,4 +437,3 @@ Additional captures from diverse environments (STC building, Sparkonics Lab, sta
 **Project PRISM** — Seeing through walls with invisible waves. 📡
 
 </div>
-]]>
